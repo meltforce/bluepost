@@ -1,7 +1,9 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Color,
+  confirmAlert,
   Icon,
   List,
   showToast,
@@ -34,6 +36,14 @@ export default function BrowsePosts() {
   }
 
   async function handleRepost(post: BlueskyPost, accounts: MastodonAccount[]) {
+    if (post.autoPost) {
+      const confirmed = await confirmAlert({
+        title: "Repost Automated Post?",
+        message: "This post was automatically generated. Are you sure you want to cross-post it?",
+        primaryAction: { title: "Repost", style: Alert.ActionStyle.Default },
+      });
+      if (!confirmed) return;
+    }
     await showToast({ style: Toast.Style.Animated, title: "Reposting..." });
     await repostToMastodon(post, accounts);
     revalidateHistory();
@@ -50,12 +60,12 @@ export default function BrowsePosts() {
   }
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} isShowingDetail>
       {posts?.map((post) => {
         const tags = getRepostTags(post.uri);
         const accessories: List.Item.Accessory[] = [];
-        if (post.blogPost) {
-          accessories.push({ tag: { value: "blog", color: Color.Blue } });
+        if (post.autoPost) {
+          accessories.push({ tag: { value: "auto", color: Color.Blue } });
         }
         if (post.hasMedia) {
           accessories.push({ icon: Icon.Image, tooltip: "Has media" });
@@ -74,6 +84,35 @@ export default function BrowsePosts() {
             title={post.text.slice(0, 80)}
             subtitle={post.text.length > 80 ? "..." : undefined}
             accessories={accessories}
+            detail={
+              <List.Item.Detail
+                markdown={post.text}
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label title="Date" text={formatDate(post.createdAt)} />
+                    {post.hasMedia && (
+                      <List.Item.Detail.Metadata.Label title="Media" icon={Icon.Image} text="Has media" />
+                    )}
+                    {post.autoPost && (
+                      <List.Item.Detail.Metadata.TagList title="Type">
+                        <List.Item.Detail.Metadata.TagList.Item text="auto" color={Color.Blue} />
+                      </List.Item.Detail.Metadata.TagList>
+                    )}
+                    {tags.length > 0 && (
+                      <List.Item.Detail.Metadata.TagList title="Reposted to">
+                        {tags.map((tag) => (
+                          <List.Item.Detail.Metadata.TagList.Item
+                            key={tag.text}
+                            text={tag.text}
+                            color={tag.color}
+                          />
+                        ))}
+                      </List.Item.Detail.Metadata.TagList>
+                    )}
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
             actions={
               <ActionPanel>
                 {mastoAccounts && mastoAccounts.length > 0 && (

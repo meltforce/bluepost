@@ -109,11 +109,12 @@ export default function ComposePost() {
       {hasMastodon && (
         <>
           <Form.Separator />
-          {mastoAccounts?.map((account) => (
+          {mastoAccounts?.map((account, i) => (
             <Form.Checkbox
               key={account.id}
               id={`masto_${account.id}`}
-              label={`Mastodon: ${account.instance}`}
+              title={i === 0 ? "Mastodon" : ""}
+              label={account.handle ? `@${account.handle}@${account.instance}` : account.instance}
               defaultValue={true}
             />
           ))}
