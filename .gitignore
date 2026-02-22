@@ -1,0 +1,24 @@
+# dependencies
+node_modules/
+
+# build
+dist/
+
+# raycast
+raycast-env.d.ts
+
+# environment
+.env
+.env.*
+
+# macOS
+.DS_Store
+
+# dev tooling (not submitted to Raycast Store)
+.claude/
+.mcp.json
+vitest.config.ts
+src/__mocks__/
+src/**/*.test.ts
+PLAN.md
+TODO.md
