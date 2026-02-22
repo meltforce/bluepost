@@ -3,6 +3,7 @@ import { LocalStorage } from "@raycast/api";
 export interface MastodonAccount {
   id: string;
   instance: string;
+  handle?: string;
   token: string;
 }
 

@@ -77,7 +77,7 @@ export interface BlueskyPost {
   createdAt: string;
   images: Array<{ url: string; alt: string; mimeType: string }>;
   hasMedia: boolean;
-  blogPost: boolean;
+  autoPost: boolean;
 }
 
 export async function fetchRecentPosts(
@@ -126,7 +126,12 @@ export async function fetchRecentPosts(
       }
 
       const { automatedPostUrl } = getPreferenceValues<Preferences>();
-      const blogPost = isAutomatedPost(embed, record.embed, automatedPostUrl);
+      const autoPost = isAutomatedPost(
+        embed,
+        record.embed,
+        automatedPostUrl,
+        record.facets,
+      );
 
       return {
         uri: item.post.uri,
@@ -135,7 +140,7 @@ export async function fetchRecentPosts(
         createdAt: record.createdAt,
         images,
         hasMedia: images.length > 0,
-        blogPost,
+        autoPost,
       };
     });
 }
@@ -154,6 +159,7 @@ export function isAutomatedPost(
   viewEmbed: unknown,
   recordEmbed: unknown,
   urlPrefix?: string,
+  facets?: AppBskyFeedPost.Record["facets"],
 ): boolean {
   if (!urlPrefix) return false;
   const prefix = urlPrefix.replace(/\/+$/, "");
@@ -174,6 +180,20 @@ export function isAutomatedPost(
     recUri.replace(/\/+$/, "").startsWith(prefix)
   ) {
     return true;
+  }
+
+  // Facet links: inline URLs in the post text
+  if (facets) {
+    for (const facet of facets) {
+      for (const feature of facet.features) {
+        if (feature.$type === "app.bsky.richtext.facet#link") {
+          const uri = (feature as { uri: string }).uri;
+          if (uri.replace(/\/+$/, "").startsWith(prefix)) {
+            return true;
+          }
+        }
+      }
+    }
   }
 
   return false;

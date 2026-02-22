@@ -49,7 +49,11 @@ export default function ManageAccounts() {
         <List.Item
           key={account.id}
           icon={{ source: Icon.PersonCircle, tintColor: Color.Purple }}
-          title={account.instance}
+          title={
+            account.handle
+              ? `@${account.handle}@${account.instance}`
+              : account.instance
+          }
           actions={
             <ActionPanel>
               <Action.Push
@@ -66,7 +70,7 @@ export default function ManageAccounts() {
                   if (
                     await confirmAlert({
                       title: "Remove Account?",
-                      message: `Remove ${account.instance}?`,
+                      message: `Remove ${account.handle ? `@${account.handle}@${account.instance}` : account.instance}?`,
                       primaryAction: {
                         title: "Remove",
                         style: Alert.ActionStyle.Destructive,
@@ -90,13 +94,18 @@ function AddMastodonForm({ onDone }: { onDone: () => void }) {
   const { pop } = useNavigation();
 
   const { handleSubmit, itemProps } = useForm<{
-    instance: string;
+    profileUrl: string;
     token: string;
   }>({
     async onSubmit(values) {
-      const instance = values.instance
+      // Accept profile URL (https://mastodon.social/@user) or just instance (mastodon.social)
+      const input = values.profileUrl
         .replace(/^https?:\/\//, "")
-        .replace(/\/$/, "");
+        .replace(/\/+$/, "");
+      const parts = input.split("/");
+      const instance = parts[0];
+      const handle = parts[1]?.startsWith("@") ? parts[1].slice(1) : undefined;
+
       const toast = await showToast({
         style: Toast.Style.Animated,
         title: "Validating credentials...",
@@ -105,6 +114,7 @@ function AddMastodonForm({ onDone }: { onDone: () => void }) {
       const account: MastodonAccount = {
         id: nanoid(),
         instance,
+        handle,
         token: values.token,
       };
 
@@ -124,7 +134,7 @@ function AddMastodonForm({ onDone }: { onDone: () => void }) {
       }
     },
     validation: {
-      instance: FormValidation.Required,
+      profileUrl: FormValidation.Required,
       token: FormValidation.Required,
     },
   });
@@ -139,9 +149,9 @@ function AddMastodonForm({ onDone }: { onDone: () => void }) {
       }
     >
       <Form.TextField
-        title="Instance"
-        placeholder="mastodon.social"
-        {...itemProps.instance}
+        title="Profile URL"
+        placeholder="https://mastodon.social/@username"
+        {...itemProps.profileUrl}
       />
       <Form.PasswordField
         title="Access Token"

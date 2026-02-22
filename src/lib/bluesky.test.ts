@@ -86,4 +86,69 @@ describe("isAutomatedPost", () => {
     };
     expect(isAutomatedPost(embed, undefined, prefix)).toBe(false);
   });
+
+  it("matches facet link when no embed present", () => {
+    const facets = [
+      {
+        features: [
+          {
+            $type: "app.bsky.richtext.facet#link",
+            uri: "https://meltforce.org/blog/mbomail-v1/",
+          },
+        ],
+        index: { byteStart: 0, byteEnd: 10 },
+      },
+    ];
+    expect(isAutomatedPost(undefined, undefined, prefix, facets)).toBe(true);
+  });
+
+  it("does not match facet link with unrelated URL", () => {
+    const facets = [
+      {
+        features: [
+          {
+            $type: "app.bsky.richtext.facet#link",
+            uri: "https://example.com/other",
+          },
+        ],
+        index: { byteStart: 0, byteEnd: 10 },
+      },
+    ];
+    expect(isAutomatedPost(undefined, undefined, prefix, facets)).toBe(false);
+  });
+
+  it("matches facet link among multiple facets", () => {
+    const facets = [
+      {
+        features: [
+          { $type: "app.bsky.richtext.facet#link", uri: "https://mailbox.org" },
+        ],
+        index: { byteStart: 0, byteEnd: 10 },
+      },
+      {
+        features: [
+          {
+            $type: "app.bsky.richtext.facet#link",
+            uri: "https://meltforce.org/blog/i-know-kung-fu/",
+          },
+        ],
+        index: { byteStart: 20, byteEnd: 30 },
+      },
+      {
+        features: [{ $type: "app.bsky.richtext.facet#tag", tag: "vibecoding" }],
+        index: { byteStart: 40, byteEnd: 50 },
+      },
+    ];
+    expect(isAutomatedPost(undefined, undefined, prefix, facets)).toBe(true);
+  });
+
+  it("ignores non-link facets", () => {
+    const facets = [
+      {
+        features: [{ $type: "app.bsky.richtext.facet#tag", tag: "blog" }],
+        index: { byteStart: 0, byteEnd: 5 },
+      },
+    ];
+    expect(isAutomatedPost(undefined, undefined, prefix, facets)).toBe(false);
+  });
 });

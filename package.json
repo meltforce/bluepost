@@ -33,15 +33,6 @@
       "title": "Automated Post URL Filter",
       "description": "Posts with link cards matching this URL prefix are tagged as automated (e.g. your blog URL)",
       "placeholder": "https://example.com/blog/"
-    },
-    {
-      "name": "dryRun",
-      "type": "checkbox",
-      "required": false,
-      "label": "Dry Run",
-      "title": "Dry Run",
-      "description": "Simulate posting without actually sending to any platform",
-      "default": false
     }
   ],
   "commands": [

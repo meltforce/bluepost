@@ -1,12 +1,8 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import type { MastodonAccount } from "./accounts";
 import { login, createPost, downloadBlob, type BlueskyPost } from "./bluesky";
 import { createClient, postStatus, uploadMedia } from "./mastodon";
 import { markReposted } from "./repost-history";
-
-function isDryRun(): boolean {
-  return getPreferenceValues<{ dryRun?: boolean }>().dryRun === true;
-}
 
 export async function postToAll(params: {
   text: string;
@@ -15,7 +11,6 @@ export async function postToAll(params: {
   mastodonAccounts: MastodonAccount[];
 }): Promise<void> {
   const { text, url, images, mastodonAccounts } = params;
-  const dry = isDryRun();
 
   // Read image files
   const imageData: Array<{ data: Uint8Array; mimeType: string }> = [];
@@ -37,44 +32,28 @@ export async function postToAll(params: {
   }
 
   // Post to Bluesky
-  if (dry) {
+  try {
+    const agent = await login();
+    await createPost(agent, {
+      text,
+      url: url || undefined,
+      images: imageData.length > 0 ? imageData : undefined,
+    });
     await showToast({
       style: Toast.Style.Success,
-      title: "[DRY RUN] Bluesky",
-      message: text.slice(0, 60),
+      title: "Posted to Bluesky",
     });
-  } else {
-    try {
-      const agent = await login();
-      await createPost(agent, {
-        text,
-        url: url || undefined,
-        images: imageData.length > 0 ? imageData : undefined,
-      });
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Posted to Bluesky",
-      });
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed: Bluesky",
-        message: String(error),
-      });
-    }
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed: Bluesky",
+      message: String(error),
+    });
   }
 
   // Post to each Mastodon account
   const mastodonText = url ? `${text}\n\n${url}` : text;
   for (const account of mastodonAccounts) {
-    if (dry) {
-      await showToast({
-        style: Toast.Style.Success,
-        title: `[DRY RUN] ${account.instance}`,
-        message: mastodonText.slice(0, 60),
-      });
-      continue;
-    }
     try {
       const client = createClient(account);
 
@@ -110,17 +89,7 @@ export async function repostToMastodon(
   post: BlueskyPost,
   mastodonAccounts: MastodonAccount[],
 ): Promise<void> {
-  const dry = isDryRun();
-
   for (const account of mastodonAccounts) {
-    if (dry) {
-      await showToast({
-        style: Toast.Style.Success,
-        title: `[DRY RUN] Repost to ${account.instance}`,
-        message: post.text.slice(0, 60),
-      });
-      continue;
-    }
     try {
       const client = createClient(account);
 

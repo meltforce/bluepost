@@ -39,7 +39,8 @@ export default function BrowsePosts() {
     if (post.autoPost) {
       const confirmed = await confirmAlert({
         title: "Repost Automated Post?",
-        message: "This post was automatically generated. Are you sure you want to cross-post it?",
+        message:
+          "This post was automatically generated. Are you sure you want to cross-post it?",
         primaryAction: { title: "Repost", style: Alert.ActionStyle.Default },
       });
       if (!confirmed) return;
@@ -89,13 +90,23 @@ export default function BrowsePosts() {
                 markdown={post.text}
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="Date" text={formatDate(post.createdAt)} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Date"
+                      text={formatDate(post.createdAt)}
+                    />
                     {post.hasMedia && (
-                      <List.Item.Detail.Metadata.Label title="Media" icon={Icon.Image} text="Has media" />
+                      <List.Item.Detail.Metadata.Label
+                        title="Media"
+                        icon={Icon.Image}
+                        text="Has media"
+                      />
                     )}
                     {post.autoPost && (
                       <List.Item.Detail.Metadata.TagList title="Type">
-                        <List.Item.Detail.Metadata.TagList.Item text="auto" color={Color.Blue} />
+                        <List.Item.Detail.Metadata.TagList.Item
+                          text="auto"
+                          color={Color.Blue}
+                        />
                       </List.Item.Detail.Metadata.TagList>
                     )}
                     {tags.length > 0 && (
