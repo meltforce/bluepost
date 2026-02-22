@@ -14,7 +14,13 @@
       "Bash(/Users/linus/.local/bin/claude plugin:*)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(bash:*)",
-      "Bash(ssh jesus:*)"
+      "Bash(ssh jesus:*)",
+      "Bash(head:*)",
+      "Bash(convert:*)",
+      "Bash(open:*)",
+      "Bash(magick:*)",
+      "Bash(sips:*)",
+      "Skill(commit-commands:commit)"
     ]
   }
 }
