@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if echo \"$CLAUDE_FILE_PATH\" | grep -qE 'package-lock\\.json$'; then echo 'BLOCK: Do not edit lock files directly. Use npm install instead.' >&2; exit 2; fi"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if echo \"$CLAUDE_FILE_PATH\" | grep -qE '\\.(ts|tsx|js|jsx|mjs)$'; then cd /Users/linus/projects/bluepost && npx prettier --write \"$CLAUDE_FILE_PATH\" 2>/dev/null; exit 0; fi"
+          }
+        ]
+      }
+    ]
+  }
+}

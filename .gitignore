@@ -4,7 +4,7 @@ node_modules/
 # build
 dist/
 
-# raycast
+# raycast (auto-generated)
 raycast-env.d.ts
 
 # environment
@@ -13,12 +13,3 @@ raycast-env.d.ts
 
 # macOS
 .DS_Store
-
-# dev tooling (not submitted to Raycast Store)
-.claude/
-.mcp.json
-vitest.config.ts
-src/__mocks__/
-src/**/*.test.ts
-PLAN.md
-TODO.md
